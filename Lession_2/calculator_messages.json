@@ -1,0 +1,15 @@
+{
+  "welcome" : "Welcome to Calculator!",
+  "invalid" : {
+    "number" : "Hmm... that doesn't look like a valid number.",
+    "operator" : "Must choose 1, 2, 3, or 4",
+    "opChoice" : ["1", "2", "3", "4"]
+  },
+  "number" : {
+    "number1" : "What's the first number?",
+    "number2" : "What's the second number?"
+  },
+  "operation" : "What operation would you like to perform?\n1) Add 2) Subtract 3) Multiply 4) Divide",
+  "result" : "The result is:",
+  "repeat" : "Another calculation? (y/n)"
+}
