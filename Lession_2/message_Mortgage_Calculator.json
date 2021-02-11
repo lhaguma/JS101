@@ -1,0 +1,14 @@
+{
+  "Welcome" : "Welcome To Mortage Calculator!",
+  "LoanAmount" : "What is your Loan Amount?",
+  "YearlyInterestRate" : "What is your Yearly Interest Rate (APR %)?",
+  "LoanDuration" : "What is your Loan Duration (years)?",
+  "invalid" : {
+    "year" : "Oops.. Not a valid year! Please enter a posive number greater than 0.",
+    "interest" : "Oops.. Not a valid interest rate! Please enter a posive number greater than 0.",
+    "loan" : "Oops.. Not a valid laon amount! Please enter a posive number greater than 0.",
+    "duration" : "Oops.. Not a valid laon duration! Please enter a posive number greater than 0.",
+    "again": "Please enter either y to continue or n to stop."
+  },
+  "again": "Would you like to perform another calculation? (y/n)"
+}
