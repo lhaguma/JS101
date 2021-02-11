@@ -36,6 +36,7 @@ while (true) {
   }
 
   prompt(messages.YearlyInterestRate);
+  prompt(messages.interestRateExample);
   let yearlyInterestRate = readline.question();
 
   while (invalidNumber(yearlyInterestRate)) {

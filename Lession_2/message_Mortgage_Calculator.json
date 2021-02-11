@@ -1,7 +1,8 @@
 {
   "Welcome" : "Welcome To Mortage Calculator!",
   "LoanAmount" : "What is your Loan Amount?",
-  "YearlyInterestRate" : "What is your Yearly Interest Rate (APR %)?",
+  "YearlyInterestRate" : "What is your Yearly Interest Rate (APR)?",
+  "interestRateExample" : "Example: Enter 5 for 5% or 0.5 for 0.5%",
   "LoanDuration" : "What is your Loan Duration (years)?",
   "invalid" : {
     "year" : "Oops.. Not a valid year! Please enter a posive number greater than 0.",
