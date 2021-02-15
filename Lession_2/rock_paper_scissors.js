@@ -42,7 +42,7 @@ function convertToFullChoice(userShortChoice) {
   }
 }
 
-function getUsersChoice () {
+function getValidUserChoice () {
   prompt(`Choose one: ${Object.keys(VALID_CHOICES).join(', ')}`);
   let choice = readline.question().toLowerCase();
 
@@ -92,7 +92,7 @@ while (true) {
     prompt(`Round ${index}:`);
 
     // Ask and validate user choice
-    let userChoice = getUsersChoice();
+    let userChoice = getValidUserChoice();
 
     //Randomly select computer's choice
     let computerChoice = getRandomChoice();
