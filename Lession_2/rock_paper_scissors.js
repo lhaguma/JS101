@@ -21,9 +21,37 @@ function prompt(message) {
   console.log(`=> ${message}`);
 }
 
-function getFullChoice(userShortChoice) {
-  return Object.keys(VALID_CHOICES).
-    find(key => VALID_CHOICES[key] === userShortChoice);
+function getRandomChoice() {
+  return Object.keys(VALID_CHOICES)[
+    Math.floor(
+      Math.random() * Object.keys(VALID_CHOICES).length
+    )];
+}
+
+function choiceIsInvalid (choice) {
+  return !Object.values(VALID_CHOICES).includes(choice) &&
+    !Object.keys(VALID_CHOICES).includes(choice);
+}
+
+function convertToFullChoice(userShortChoice) {
+  if (Object.values(VALID_CHOICES).includes(userShortChoice)) {
+    return Object.keys(VALID_CHOICES).
+      find(key => VALID_CHOICES[key] === userShortChoice);
+  } else {
+    return userShortChoice;
+  }
+}
+
+function getUsersChoice () {
+  prompt(`Choose one: ${Object.keys(VALID_CHOICES).join(', ')}`);
+  let choice = readline.question().toLowerCase();
+
+  while (choiceIsInvalid(choice)) {
+    prompt(`That's not a valid choice.\nOther valid inputs: ${Object.values(VALID_CHOICES).join(', ')}`);
+    choice = readline.question().toLowerCase();
+  }
+
+  return convertToFullChoice(choice);
 }
 
 function userWins (userFullChoice, computerFullChoice) {
@@ -40,6 +68,16 @@ function displayWinner (userFullChoice, computerFullChoice) {
   }
 }
 
+function displayGrandWinner (userFullChoice, computerFullChoice) {
+  if (userFullChoice > computerFullChoice) {
+    prompt('You are the Grand Champion!\n');
+  } else if (computerFullChoice > userFullChoice) {
+    prompt('Computer is the Grand Champion!\n');
+  } else {
+    prompt("It's a tie.\n");
+  }
+}
+
 //Game loop sequence
 while (true) {
   prompt('Welcome to the Rock Paper Scissors Lizard Spock Game!\n');
@@ -47,41 +85,26 @@ while (true) {
   let userScore = 0;
   let computerScore = 0;
 
+  prompt(`Best score in the ${NUMBER_OF_ROUNDS} rounds wins!`);
+
   //Rounds of the game
   for (let index = 1; index <= NUMBER_OF_ROUNDS; index += 1) {
     prompt(`Round ${index}:`);
 
     // Ask and validate user choice
-    prompt(`Choose one: ${Object.keys(VALID_CHOICES).join(', ')}`);
-    let userChoice = readline.question();
-
-    while (!Object.values(VALID_CHOICES).includes(userChoice) &&
-    !Object.keys(VALID_CHOICES).includes(userChoice)) {
-      prompt(`That's not a valid choice.\nOther valid inputs: ${Object.values(VALID_CHOICES).join(', ')}`);
-      userChoice = readline.question();
-    }
-
-    //Convert short choice into full choice
-    let userLongChoice;
-    if (Object.values(VALID_CHOICES).includes(userChoice)) {
-      userLongChoice = getFullChoice(userChoice);
-    } else {
-      userLongChoice = userChoice;
-    }
+    let userChoice = getUsersChoice();
 
     //Randomly select computer's choice
-    let randomIndex = Math.floor(Math.random() *
-    Object.keys(VALID_CHOICES).length);
-    let computerChoice = Object.keys(VALID_CHOICES)[randomIndex];
+    let computerChoice = getRandomChoice();
 
     //Display user and computer choices and winner
-    prompt(`You chose ${userLongChoice}, computer chose ${computerChoice}\n`);
-    displayWinner(userLongChoice, computerChoice);
+    prompt(`You chose ${userChoice}, computer chose ${computerChoice}\n`);
+    displayWinner(userChoice, computerChoice);
 
     //Keep track of score
-    if (userWins(userLongChoice, computerChoice)) {
+    if (userWins(userChoice, computerChoice)) {
       userScore += 1;
-    } else if (userLongChoice === computerChoice) {
+    } else if (userChoice === computerChoice) {
       userScore += 1;
       computerScore += 1;
     } else {
@@ -93,13 +116,7 @@ while (true) {
   }
 
   //Display grand winner after 5 rounds
-  if (userScore > computerScore) {
-    prompt('You are the Grand Champion!\n');
-  } else if (computerScore > userScore) {
-    prompt('Computer is the Grand Champion!\n');
-  } else {
-    prompt("It's a tie.\n");
-  }
+  displayGrandWinner (userScore, computerScore);
 
   //Ask user if they want to play again
   prompt('Do you want to play again (y/n)?');
@@ -110,5 +127,5 @@ while (true) {
     playAgainAnswer = readline.question().toLowerCase();
   }
   console.clear();
-  if (playAgainAnswer[0] !== 'y') break;
+  if (playAgainAnswer !== 'y') break;
 }
