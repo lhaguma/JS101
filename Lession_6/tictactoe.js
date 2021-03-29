@@ -9,6 +9,8 @@ const WINNING_COMBINATIONS = [
   [1 ,5 , 9], [3, 5, 7] // Winning diagonally
 ];
 
+let firstPlayer;
+
 function displayBoard (board) {
   console.log('');
   console.log('     |     |');
@@ -27,9 +29,9 @@ function displayBoard (board) {
 
 function displayFullBoard (board) {
   console.clear();
-  console.log(`${FIRST_PLAYER[0].toUpperCase() + FIRST_PLAYER.slice(1)} will mark a square first.`);
+  console.log(`${firstPlayer[0].toUpperCase() + firstPlayer.slice(1)} choose first each round.`);
   console.log(`You are ${USER_MARKER}. Computer is ${COMPUTER_MARKER}.`);
-  console.log(`First to reach score of 5 wins the entire match.`);
+  console.log(`First to score of 5 wins the entire match.`);
   displayBoard(board);
 }
 
@@ -160,7 +162,7 @@ function playFirst () {
   let choice;
 
   while (true) {
-    prompt(`Choose who plays first: ${joinOr(validChoices)}`);
+    prompt(`Choose who will plays first for all rounds: ${joinOr(validChoices)}`);
     choice = readline.prompt().toLowerCase().trim();
     if (validChoices.includes(choice)) break;
     prompt(`Please choose one of these choices: ${joinOr(validChoices)}`);
@@ -190,46 +192,60 @@ function alternatePlayer (currentPlayer) {
     return "player";
   }
 }
+
+// Introduce game and rules
+console.clear();
 prompt("Welcome to the Tic Tac Toe Game!");
-prompt("Game Rules: Each player will choose a square on the board by it's associated number: ");
+prompt("Game Rules: Each player will choose a square on the board according to its number:");
 let exampleSquares = initializeBoard();
 for (let idx = 0; idx <= 9; idx += 1) {
   exampleSquares[String(idx)] = String(idx);
 }
 displayBoard(exampleSquares);
 
-const FIRST_PLAYER = playFirst();
+// Establish first player
+firstPlayer = playFirst();
 
+// Initiallize match
 while (true) {
   let round = 0;
   let userScore = 0;
   let computerScore = 0;
   let previousRoundWinner;
 
+  // Initiallize each round of the match
   while (true) {
     let board = initializeBoard();
-    let currentPlayer = FIRST_PLAYER;
+    let currentPlayer = firstPlayer;
 
+    // Computer and Player taking turns marking board
     while (true) {
+      // Messages displayed with board
       displayFullBoard(board);
       if (round > 0) prompt(`${previousRoundWinner} Round ${round - 1}!`);
       console.log("");
       prompt(`Round: ${round}`);
       displayScore(userScore, computerScore);
+
+      // Each player takes turns marking board until someone wins
       chooseSquare(board, currentPlayer);
       currentPlayer = alternatePlayer(currentPlayer);
+
+      // If board is full or some one wins move to next round
       if (someoneWins(board) || boardFull(board)) break;
     }
 
+    // Display board
     displayFullBoard(board);
-    displayScore(userScore, computerScore);
 
+    // Determine who won round
     if (!determineWinner(board)) {
       previousRoundWinner = "Player and Computer tied";
     } else {
       previousRoundWinner = `${determineWinner(board)} won`;
     }
 
+    // Update scores and round
     if (someoneWins(board)) {
       prompt(`${determineWinner(board)} wins Round ${round}!`);
       round++;
@@ -245,31 +261,34 @@ while (true) {
       computerScore++;
     }
 
+    displayScore(userScore, computerScore);
 
+    // Determin which player wins the match
     if (userScore > computerScore && userScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`Player Wins the match!`);
+      prompt(`Player Wins the match!\n`);
       break;
     } else if (computerScore > userScore &&
       computerScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`Computer Wins the match!`);
+      prompt(`Computer Wins the match!\n`);
       break;
     } else if (userScore >= GAMES_TO_WIN_MATCH ||
       computerScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`It's a Tie!`);
+      prompt(`It's a Tie!\n`);
       break;
     }
   }
 
-  let validPlayAgainResponse = "YN";
-  prompt("Do you want to play again? (y/n)");
-  let playAgainResponse = readline.prompt().toUpperCase();
+  // Ask player if they want a rematch
+  let validPlayAgainResponse = "yn";
+  prompt("Do you want to play again? (y)es or (n)o?");
+  let playAgainResponse = readline.prompt().toLocaleLowerCase();
 
   while (!validPlayAgainResponse.includes(playAgainResponse)) {
     prompt("Please enter y or n. Case does not matter.");
-    playAgainResponse = readline.prompt().toUpperCase().trim();
+    playAgainResponse = readline.prompt().toLocaleLowerCase().trim();
   }
 
-  if (playAgainResponse === 'N') break;
+  if (playAgainResponse === 'n') break;
 }
 
 prompt("Thank you for playing Tic Tac Toe!");
