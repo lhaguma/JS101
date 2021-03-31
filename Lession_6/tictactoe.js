@@ -3,6 +3,8 @@ const UNMARKED_SPACE = " ";
 const USER_MARKER = "X";
 const COMPUTER_MARKER = "O";
 const GAMES_TO_WIN_MATCH = 5;
+const USER = 'Player';
+const COMPUTER = 'Computer';
 const WINNING_COMBINATIONS = [
   [1, 2, 3], [4, 5, 6], [7, 8, 9], // Winning horizontally
   [1, 4, 7], [2, 5, 8], [3, 6, 9], // Winning vertically
@@ -29,9 +31,9 @@ function displayBoard (board) {
 
 function displayFullBoard (board) {
   console.clear();
-  console.log(`${firstPlayer[0].toUpperCase() + firstPlayer.slice(1)} choose first each round.`);
+  console.log(`${firstPlayer} choose first each round.`);
   console.log(`You are ${USER_MARKER}. Computer is ${COMPUTER_MARKER}.`);
-  console.log(`First to score of 5 wins the entire match.`);
+  console.log(`First to a score of 5 wins the entire match.`);
   displayBoard(board);
 }
 
@@ -95,23 +97,24 @@ function chooseRandomSquare (board) {
   return validSquares(board)[randomIndex];
 }
 
+function findCriticalSquare (board, marker, square) {
+  for (let idx = 0; idx < WINNING_COMBINATIONS.length; idx++) {
+    let line = WINNING_COMBINATIONS[idx];
+    square = findAtRiskSquare(line, board, marker);
+    if (square) break;
+  }
+  return square;
+}
+
 function computerChoosesSquare (board) {
   let computerSquare;
 
   // Offense
-  for (let idx = 0; idx < WINNING_COMBINATIONS.length; idx++) {
-    let line = WINNING_COMBINATIONS[idx];
-    computerSquare = findAtRiskSquare(line, board, COMPUTER_MARKER);
-    if (computerSquare) break;
-  }
+  computerSquare = findCriticalSquare(board, COMPUTER_MARKER, computerSquare);
 
   // Defense
   if (!computerSquare) {
-    for (let idx = 0; idx < WINNING_COMBINATIONS.length; idx++) {
-      let line = WINNING_COMBINATIONS[idx];
-      computerSquare = findAtRiskSquare(line, board, USER_MARKER);
-      if (computerSquare) break;
-    }
+    computerSquare = findCriticalSquare(board, USER_MARKER, computerSquare);
   }
 
   // Pick the optima square: #5
@@ -121,6 +124,19 @@ function computerChoosesSquare (board) {
   if (!computerSquare) computerSquare = chooseRandomSquare(board);
 
   board[computerSquare] = COMPUTER_MARKER;
+}
+
+function playSingleRound (board, round, winner, userScore, compScore, player) {
+  // Messages displayed with board
+  displayFullBoard(board);
+  if (round > 0) prompt(`${winner} Round ${round - 1}!`);
+  console.log("");
+
+  prompt(`Round: ${round}`);
+  displayScore(userScore, compScore);
+
+  // Each player takes a turn marking board until someone wins
+  chooseSquare(board, player);
 }
 
 function determineWinner (board) {
@@ -135,9 +151,9 @@ function determineWinner (board) {
   });
 
   if (playerWins) {
-    return 'Player';
+    return USER;
   } else if (computerWins) {
-    return 'Computer';
+    return COMPUTER;
   } else {
     return undefined;
   }
@@ -157,28 +173,29 @@ function displayScore (userScore, computerScore) {
 }
 
 function playFirst () {
-
-  let validChoices = ["player", "computer", "choose"];
+  let validChoices = ["player", "computer", "random"];
+  let smallChoice = ['p', 'c', 'r'];
   let choice;
 
   while (true) {
-    prompt(`Choose who will plays first for all rounds: ${joinOr(validChoices)}`);
+    prompt(`Choose who will plays first for every rounds: (p)layer, (c)omputer, or (r)andom`);
     choice = readline.prompt().toLowerCase().trim();
-    if (validChoices.includes(choice)) break;
+    if (validChoices.includes(choice) || smallChoice.includes(choice[0])) break;
     prompt(`Please choose one of these choices: ${joinOr(validChoices)}`);
+    prompt(`These are also valid choices: ${joinOr(smallChoice)}`);
   }
 
-  if (choice === "choose") {
-    let smallChoice = ["player", "computer"];
-    let randomIndex = Math.floor(Math.random() * 2);
-    choice = smallChoice[randomIndex];
+  if (['random', 'r'].includes(choice)) {
+    choice = ["player", "computer"][Math.floor(Math.random() * 2)];
+  } else if (choice.length === 1) {
+    choice = validChoices.filter(value => value[0] === choice)[0];
   }
 
-  return choice;
+  return choice[0].toUpperCase() + choice.slice(1).toLowerCase();
 }
 
 function chooseSquare (board, currentPlayer) {
-  if (currentPlayer === "player") {
+  if (currentPlayer === USER) {
     playerChoosesSquare(board);
   } else {
     computerChoosesSquare(board);
@@ -186,10 +203,39 @@ function chooseSquare (board, currentPlayer) {
 }
 
 function alternatePlayer (currentPlayer) {
-  if (currentPlayer === "player") {
-    return "computer";
+  if (currentPlayer === USER) {
+    return COMPUTER;
   } else {
-    return "player";
+    return USER;
+  }
+}
+
+function updatePreviousRoundWinner (board) {
+  if (!determineWinner(board)) {
+    return "Player and Computer tied";
+  } else {
+    return `${determineWinner(board)} won`;
+  }
+}
+
+function displayCurrentWinner (board, round) {
+  if (someoneWins(board)) {
+    prompt(`${determineWinner(board)} wins Round ${round}!`);
+  } else {
+    prompt(`Round ${round} is a tie!`);
+  }
+}
+
+function displayGrandWinner (userScore, computerScore) {
+  // Determin which player wins the match
+  if (userScore > computerScore && userScore >= GAMES_TO_WIN_MATCH) {
+    prompt(`Player Wins the match!\n`);
+  } else if (computerScore > userScore &&
+    computerScore >= GAMES_TO_WIN_MATCH) {
+    prompt(`Computer Wins the match!\n`);
+  } else if (userScore >= GAMES_TO_WIN_MATCH ||
+    computerScore >= GAMES_TO_WIN_MATCH) {
+    prompt(`It's a Tie!\n`);
   }
 }
 
@@ -220,15 +266,10 @@ while (true) {
 
     // Computer and Player taking turns marking board
     while (true) {
-      // Messages displayed with board
-      displayFullBoard(board);
-      if (round > 0) prompt(`${previousRoundWinner} Round ${round - 1}!`);
-      console.log("");
-      prompt(`Round: ${round}`);
-      displayScore(userScore, computerScore);
+      playSingleRound (board, round,
+        previousRoundWinner, userScore, computerScore, currentPlayer);
 
-      // Each player takes turns marking board until someone wins
-      chooseSquare(board, currentPlayer);
+      // Change who plays next
       currentPlayer = alternatePlayer(currentPlayer);
 
       // If board is full or some one wins move to next round
@@ -239,41 +280,32 @@ while (true) {
     displayFullBoard(board);
 
     // Determine who won round
-    if (!determineWinner(board)) {
-      previousRoundWinner = "Player and Computer tied";
-    } else {
-      previousRoundWinner = `${determineWinner(board)} won`;
-    }
+    previousRoundWinner = updatePreviousRoundWinner (board);
+
+    // Display current winner
+    displayCurrentWinner(board, round);
 
     // Update scores and round
-    if (someoneWins(board)) {
-      prompt(`${determineWinner(board)} wins Round ${round}!`);
-      round++;
-      if (determineWinner(board) === 'Player') {
+    round++;
+
+    switch (determineWinner(board)) {
+      case USER: userScore++;
+        break;
+      case COMPUTER: computerScore++;
+        break;
+      default:
         userScore++;
-      } else {
         computerScore++;
-      }
-    } else {
-      prompt(`Round ${round} is a tie!`);
-      round++;
-      userScore++;
-      computerScore++;
+        break;
     }
 
+    // display updated score
     displayScore(userScore, computerScore);
 
     // Determin which player wins the match
-    if (userScore > computerScore && userScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`Player Wins the match!\n`);
-      break;
-    } else if (computerScore > userScore &&
+    if (userScore >= GAMES_TO_WIN_MATCH ||
       computerScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`Computer Wins the match!\n`);
-      break;
-    } else if (userScore >= GAMES_TO_WIN_MATCH ||
-      computerScore >= GAMES_TO_WIN_MATCH) {
-      prompt(`It's a Tie!\n`);
+      displayGrandWinner (userScore, computerScore);
       break;
     }
   }
